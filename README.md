@@ -2,7 +2,7 @@
 
 This project demonstrates a simple **Express.js** web server containerized using **Docker**, with **NGINX** configured as a **reverse proxy**.
 
-The Express.js server responds with `"Hello, DevOps!"` on the root endpoint (`GET /`), while NGINX forwards incoming HTTP requests on port `80` to the Express server running on port `3000`.
+The Express.js server responds with `"Hello, DevOps!"` on the root endpoint (`GET /`), while NGINX forwards incoming HTTP requests on port `8080` to the Express server running on port `3000`.
 
 ---
 
@@ -62,106 +62,16 @@ mkdir -p ~/Documents/devops_practical_exam
 cd ~/Documents/devops_practical_exam
 ```
 
-### 2. Create Required Files
+### 2. Create the Required Files
 
-Use a text editor (e.g., `nano`) to create and save the following files:
+Use your preferred text editor (e.g., nano, vim, VS Code) to create:
 
-#### `app.js`
-
-```js
-const express = require('express');
-const app = express();
-const port = 3000;
-
-app.get('/', (req, res) => {
-  res.send('Hello, DevOps!');
-});
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
-```
-
-#### `package.json`
-
-```json
-{
-  "name": "express-devops",
-  "version": "1.0.0",
-  "description": "Simple Express.js server for DevOps demo",
-  "main": "app.js",
-  "scripts": {
-    "start": "node app.js"
-  },
-  "dependencies": {
-    "express": "^4.21.1"
-  }
-}
-```
-
-#### `Dockerfile`
-
-```Dockerfile
-FROM node:22
-
-WORKDIR /usr/src/app
-
-COPY package.json ./
-RUN npm install
-
-COPY app.js ./
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
-```
-
-#### `nginx.conf`
-
-```nginx
-events {
-  worker_connections 1024;
-}
-
-http {
-  server {
-    listen 80;
-    server_name localhost;
-
-    location / {
-      proxy_pass http://express-app:3000;
-      proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_set_header X-Forwarded-Proto $scheme;
-    }
-  }
-}
-```
-
-#### `docker-compose.yml`
-
-```yaml
-version: '3.8'
-services:
-  express-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    container_name: express-app
-
-  nginx:
-    image: nginx:latest
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    ports:
-      - "80:80"
-    depends_on:
-      - express-app
-    container_name: nginx-proxy
-```
+* `app.js`
+* `package.json`
+* `Dockerfile`
+* `nginx.conf`
+* `docker-compose.yml`
+* `.dockerignore`
 
 #### `.dockerignore`
 
@@ -174,6 +84,42 @@ npm-debug.log
 
 ```bash
 chmod 644 *.js *.json *.conf *.yml Dockerfile
+```
+
+---
+
+## 📥 Cloning and Usage
+
+Follow these steps to clone and run this project:
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/mucyo44/mucyo_honorine.git
+cd mucyo_honorine/devops_practical_exam
+```
+
+> Make sure to replace `devops_practical_exam` with the actual folder if it's named differently in your repo.
+
+### 2. Build and Start the Application
+
+```bash
+sudo docker-compose up -d --build
+```
+
+### 3. Test in Browser or Terminal
+
+* Visit [http://localhost](http://localhost) in your browser.
+* Or run:
+
+```bash
+curl http://localhost
+```
+
+### 4. Stop the Application
+
+```bash
+sudo docker-compose down
 ```
 
 ---
@@ -195,7 +141,7 @@ sudo docker ps
 Expected output:
 
 * `express-app` on port `3000`
-* `nginx-proxy` on port `80`
+* `nginx-proxy` on port `8080`
 
 ---
 
@@ -269,4 +215,3 @@ sudo docker-compose down
 * NGINX proxies traffic from port **80** to Express.
 * Docker Compose sets up a shared network between services automatically.
 * Ideal for DevOps practice in container orchestration and reverse proxy setup.
-
